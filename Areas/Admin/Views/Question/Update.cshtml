@@ -1,0 +1,56 @@
+@model LMS.Areas.Admin.ViewModels.Question.UpdateQuestionVM
+@{
+    ViewData["Title"] = "Edit Question";
+}
+
+<div class="card stat-card p-4" style="max-width:700px;">
+    <form asp-area="Admin" asp-controller="Question" asp-action="Update" method="post">
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="QuizId" />
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="mb-3">
+            <label asp-for="Text" class="form-label">Question Text</label>
+            <textarea asp-for="Text" class="form-control" rows="2"></textarea>
+            <span asp-validation-for="Text" class="text-danger small"></span>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="OptionA" class="form-label">Option A</label>
+                <input asp-for="OptionA" class="form-control" />
+                <span asp-validation-for="OptionA" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="OptionB" class="form-label">Option B</label>
+                <input asp-for="OptionB" class="form-control" />
+                <span asp-validation-for="OptionB" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="OptionC" class="form-label">Option C</label>
+                <input asp-for="OptionC" class="form-control" />
+                <span asp-validation-for="OptionC" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="OptionD" class="form-label">Option D</label>
+                <input asp-for="OptionD" class="form-control" />
+                <span asp-validation-for="OptionD" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="CorrectOption" class="form-label">Correct Option</label>
+                <select asp-for="CorrectOption" class="form-select">
+                    <option value="A" selected="@(Model.CorrectOption == "A")">A</option>
+                    <option value="B" selected="@(Model.CorrectOption == "B")">B</option>
+                    <option value="C" selected="@(Model.CorrectOption == "C")">C</option>
+                    <option value="D" selected="@(Model.CorrectOption == "D")">D</option>
+                </select>
+                <span asp-validation-for="CorrectOption" class="text-danger small"></span>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary"><i class="fa fa-save me-2"></i>Update</button>
+            <a asp-area="Admin" asp-controller="Quiz" asp-action="Questions" asp-route-id="@Model.QuizId" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+</div>

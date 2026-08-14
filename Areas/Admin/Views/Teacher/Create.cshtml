@@ -1,0 +1,50 @@
+@model LMS.Areas.Admin.ViewModels.Teacher.CreateTeacherVM
+@{
+    ViewData["Title"] = "New Teacher";
+}
+
+<div class="card stat-card p-4" style="max-width:600px;">
+    <form asp-area="Admin" asp-controller="Teacher" asp-action="Create" method="post" enctype="multipart/form-data">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="FirstName" class="form-label">First Name</label>
+                <input asp-for="FirstName" class="form-control" placeholder="e.g. Huseynli" />
+                <span asp-validation-for="FirstName" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="LastName" class="form-label">Last Name</label>
+                <input asp-for="LastName" class="form-control" placeholder="e.g. Husniyya" />
+                <span asp-validation-for="LastName" class="text-danger small"></span>
+            </div>
+        </div>
+
+        <div class="mb-3 mt-3">
+            <label asp-for="Subject" class="form-label">Subject</label>
+            <input asp-for="Subject" class="form-control" placeholder="e.g. Mathematics & Logic" />
+            <span asp-validation-for="Subject" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label">Email (optional)</label>
+            <input asp-for="Email" class="form-control" placeholder="teacher@lms.com" />
+            <span asp-validation-for="Email" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Bio" class="form-label">Bio</label>
+            <textarea asp-for="Bio" class="form-control" rows="4" placeholder="Short biography and teaching experience"></textarea>
+            <span asp-validation-for="Bio" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="PhotoFile" class="form-label">Photo (optional)</label>
+            <input asp-for="PhotoFile" type="file" class="form-control" />
+            <span asp-validation-for="PhotoFile" class="text-danger small"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary"><i class="fa fa-save me-2"></i>Save</button>
+        <a asp-area="Admin" asp-controller="Teacher" asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+    </form>
+</div>

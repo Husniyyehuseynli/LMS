@@ -1,0 +1,41 @@
+@model List<Teacher>
+@{
+    ViewData["Title"] = "Switch Teacher Account";
+}
+
+<div class="container-fluid bg-primary py-5 mb-5 page-header">
+    <div class="container py-5">
+        <h1 class="display-4 text-white text-center mb-0">Switch Teacher Account</h1>
+        <p class="text-white text-center mb-0">Only visible to teachers — jump into any other teacher's account.</p>
+    </div>
+</div>
+
+<div class="container-xxl py-5">
+    <div class="container">
+        @if (!Model.Any())
+        {
+            <p class="text-muted">There are no other teacher accounts yet.</p>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var teacher in Model)
+                {
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">@teacher.FirstName @teacher.LastName</h6>
+                                    <span class="text-muted small">@teacher.Subject</span>
+                                </div>
+                                <form asp-controller="Teacher" asp-action="SwitchTo" asp-route-id="@teacher.Id" method="post" onsubmit="return confirm('Switch into @teacher.FirstName @teacher.LastName\'s account?');">
+                                    <button type="submit" class="btn btn-sm btn-primary">Switch</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,91 @@
+@model List<Enrollment>
+@{
+    Course course = ViewBag.Course;
+    List<Lesson> lessons = ViewBag.Lessons;
+    Dictionary<string, Dictionary<int, bool>> progressByStudent = ViewBag.ProgressByStudent;
+    ViewData["Title"] = "Progress - " + course.Name;
+}
+@functions {
+    int PercentFor(string studentId, List<Lesson> lessons, Dictionary<string, Dictionary<int, bool>> progressByStudent)
+    {
+        if (lessons.Count == 0) return 0;
+        var studentProgress = progressByStudent.TryGetValue(studentId, out var p) ? p : new Dictionary<int, bool>();
+        int completed = lessons.Count(l => studentProgress.TryGetValue(l.Id, out bool done) && done);
+        return (int)Math.Round(completed * 100.0 / lessons.Count);
+    }
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h5 class="mb-0">@course.Name - Student Progress</h5>
+        <span class="text-muted small">@Model.Count student(s) enrolled &middot; @lessons.Count lesson(s)</span>
+    </div>
+    <div>
+        <a asp-area="Admin" asp-controller="Course" asp-action="Lessons" asp-route-id="@course.Id" class="btn btn-outline-dark"><i class="fa fa-list-ol me-1"></i>Lessons</a>
+        <a asp-area="Admin" asp-controller="Course" asp-action="Index" class="btn btn-outline-secondary">Back</a>
+    </div>
+</div>
+
+@if (!lessons.Any())
+{
+    <div class="alert alert-light border">This course has no lessons yet, so there's nothing to track.</div>
+}
+else if (!Model.Any())
+{
+    <div class="alert alert-light border">No students are enrolled in this course yet.</div>
+}
+else
+{
+    <div class="card stat-card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Student</th>
+                        @foreach (var lesson in lessons)
+                        {
+                            <th class="text-center" title="@lesson.Title">#@lesson.OrderIndex</th>
+                        }
+                        <th style="min-width:160px;">Overall</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var enrollment in Model)
+                    {
+                        int percent = PercentFor(enrollment.StudentId, lessons, progressByStudent);
+                        var studentProgress = progressByStudent.TryGetValue(enrollment.StudentId, out var sp) ? sp : new Dictionary<int, bool>();
+                        <tr>
+                            <td>
+                                <div>@enrollment.Student.Name @enrollment.Student.Surname</div>
+                                <div class="text-muted small">@enrollment.Student.Email</div>
+                            </td>
+                            @foreach (var lesson in lessons)
+                            {
+                                bool done = studentProgress.TryGetValue(lesson.Id, out bool d) && d;
+                                <td class="text-center">
+                                    @if (done)
+                                    {
+                                        <i class="fa fa-check-circle text-success" title="@lesson.Title - completed"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fa fa-circle text-muted" title="@lesson.Title - not completed"></i>
+                                    }
+                                </td>
+                            }
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress flex-grow-1" style="height:8px;">
+                                        <div class="progress-bar @(percent == 100 ? "bg-success" : "bg-primary")" role="progressbar"
+                                             style="width:@(percent)%;" aria-valuenow="@percent" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                    <span class="small text-muted" style="min-width:38px;">@percent%</span>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

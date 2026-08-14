@@ -1,0 +1,80 @@
+@model LMS.Areas.Admin.ViewModels.Course.UpdateCourseVM
+@{
+    ViewData["Title"] = "Edit Course";
+    List<Category> categories = ViewBag.Categories;
+}
+
+<div class="card stat-card p-4" style="max-width:700px;">
+    <form asp-area="Admin" asp-controller="Course" asp-action="Update" method="post" enctype="multipart/form-data">
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="ImageUrl" />
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? Url.Content($"~/img/course-{(Model.Id % 3) + 1}.jpg") : Url.Content("~/uploads/courses/" + Model.ImageUrl))" style="width:150px;height:100px;object-fit:cover;border-radius:.4rem;" class="mb-3" onerror="this.onerror=null;this.src='@Url.Content("~/img/course-1.jpg")'" />
+        }
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Name" class="form-label">Course Name</label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="CategoryId" class="form-label">Category</label>
+                <select asp-for="CategoryId" class="form-select">
+                    @foreach (var cat in categories)
+                    {
+                        <option value="@cat.Id" selected="@(cat.Id == Model.CategoryId)">@cat.Name</option>
+                    }
+                </select>
+                <span asp-validation-for="CategoryId" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="InstructorName" class="form-label">Instructor Name</label>
+                <input asp-for="InstructorName" class="form-control" />
+                <span asp-validation-for="InstructorName" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="DurationHours" class="form-label">Duration (hours)</label>
+                <input asp-for="DurationHours" type="number" class="form-control" />
+                <span asp-validation-for="DurationHours" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Level" class="form-label">Level</label>
+                <select asp-for="Level" class="form-select" asp-items="Html.GetEnumSelectList<LMS.Models.CourseLevel>()"></select>
+                <span asp-validation-for="Level" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Language" class="form-label">Language</label>
+                <select asp-for="Language" class="form-select" asp-items="Html.GetEnumSelectList<LMS.Models.CourseLanguage>()"></select>
+                <span asp-validation-for="Language" class="text-danger small"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="ShortDescription" class="form-label">Short Description</label>
+                <input asp-for="ShortDescription" class="form-control" />
+                <span asp-validation-for="ShortDescription" class="text-danger small"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="Description" class="form-label">Detailed Description</label>
+                <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+                <span asp-validation-for="Description" class="text-danger small"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="ImageFile" class="form-label">New Image (leave blank to keep current)</label>
+                <input asp-for="ImageFile" type="file" class="form-control" accept="image/*" />
+                <span asp-validation-for="ImageFile" class="text-danger small"></span>
+            </div>
+            <div class="col-12">
+                <label asp-for="VideoUrl" class="form-label">Video URL (optional)</label>
+                <input asp-for="VideoUrl" class="form-control" placeholder="e.g. https://www.youtube.com/watch?v=..." />
+                <div class="form-text">Paste a YouTube link — it will be embedded automatically on the course page.</div>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary"><i class="fa fa-save me-2"></i>Update</button>
+                <a asp-area="Admin" asp-controller="Course" asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </div>
+    </form>
+</div>

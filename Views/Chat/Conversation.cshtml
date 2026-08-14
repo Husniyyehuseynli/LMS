@@ -1,0 +1,134 @@
+@model List<ChatMessage>
+@{
+    ViewData["Title"] = "Chat with " + ViewBag.OtherUserName;
+    string otherUserId = ViewBag.OtherUserId;
+    string otherUserName = ViewBag.OtherUserName;
+    string currentUserId = ViewBag.CurrentUserId;
+    string? otherUserSubject = ViewBag.OtherUserSubject;
+}
+
+<div class="container-fluid bg-primary py-5 mb-5 page-header">
+    <div class="container py-5">
+        <h1 class="display-5 text-white text-center mb-0">@otherUserName</h1>
+        @if (!string.IsNullOrWhiteSpace(otherUserSubject))
+        {
+            <p class="text-white text-center mb-0">@otherUserSubject Teacher</p>
+        }
+    </div>
+</div>
+
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white d-flex align-items-center">
+                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-2" style="width:36px;height:36px;">
+                            <i class="fa fa-user text-primary"></i>
+                        </div>
+                        <strong>@otherUserName</strong>
+                        <a asp-controller="Chat" asp-action="Index" class="ms-auto btn btn-sm btn-outline-secondary"><i class="fa fa-arrow-left me-1"></i>Back</a>
+                    </div>
+                    <div id="chat-messages" style="height:420px; overflow-y:auto; background:#f4f7fb; padding:16px;">
+                        @foreach (var m in Model)
+                        {
+                            bool mine = m.SenderId == currentUserId;
+                            <div class="d-flex mb-2 @(mine ? "justify-content-end" : "justify-content-start")" data-message-id="@m.Id">
+                                <div class="p-2 px-3 rounded-3 @(mine ? "bg-primary text-white" : "bg-white border")" style="max-width:75%;">
+                                    <div>@m.Content</div>
+                                    <div class="small @(mine ? "text-white-50" : "text-muted") text-end">@m.SentAt.ToString("HH:mm")</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="card-footer bg-white">
+                        <form id="chat-form" class="d-flex gap-2">
+                            <input type="text" id="chat-input" class="form-control" placeholder="Type a message..." autocomplete="off" required />
+                            <button type="submit" class="btn btn-primary"><i class="fa fa-paper-plane"></i></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var otherUserId = @Html.Raw(Json.Serialize(otherUserId));
+            var currentUserId = @Html.Raw(Json.Serialize(currentUserId));
+            var messagesEl = document.getElementById('chat-messages');
+            var form = document.getElementById('chat-form');
+            var input = document.getElementById('chat-input');
+            var lastId = 0;
+
+            document.querySelectorAll('#chat-messages [data-message-id]').forEach(function (el) {
+                var id = parseInt(el.getAttribute('data-message-id'), 10);
+                if (id > lastId) lastId = id;
+            });
+
+            function scrollToBottom() {
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+            }
+            scrollToBottom();
+
+            function appendMessage(msg) {
+                var mine = msg.senderId === currentUserId;
+                var wrap = document.createElement('div');
+                wrap.className = 'd-flex mb-2 ' + (mine ? 'justify-content-end' : 'justify-content-start');
+                wrap.setAttribute('data-message-id', msg.id);
+
+                var bubble = document.createElement('div');
+                bubble.className = 'p-2 px-3 rounded-3 ' + (mine ? 'bg-primary text-white' : 'bg-white border');
+                bubble.style.maxWidth = '75%';
+
+                var contentDiv = document.createElement('div');
+                contentDiv.textContent = msg.content;
+
+                var timeDiv = document.createElement('div');
+                timeDiv.className = 'small text-end ' + (mine ? 'text-white-50' : 'text-muted');
+                timeDiv.textContent = msg.sentAt;
+
+                bubble.appendChild(contentDiv);
+                bubble.appendChild(timeDiv);
+                wrap.appendChild(bubble);
+                messagesEl.appendChild(wrap);
+
+                if (msg.id > lastId) lastId = msg.id;
+            }
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                var content = input.value.trim();
+                if (!content) return;
+                input.value = '';
+
+                fetch('/Chat/Send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'receiverId=' + encodeURIComponent(otherUserId) + '&content=' + encodeURIComponent(content)
+                })
+                    .then(function (res) { return res.json(); })
+                    .then(function (msg) {
+                        appendMessage(msg);
+                        scrollToBottom();
+                    });
+            });
+
+            function poll() {
+                fetch('/Chat/Poll?otherUserId=' + encodeURIComponent(otherUserId) + '&afterId=' + lastId)
+                    .then(function (res) { return res.json(); })
+                    .then(function (msgs) {
+                        if (msgs && msgs.length) {
+                            msgs.forEach(appendMessage);
+                            scrollToBottom();
+                        }
+                    })
+                    .catch(function () { /* ignore transient polling errors */ });
+            }
+
+            setInterval(poll, 3000);
+        })();
+    </script>
+}

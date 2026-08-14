@@ -1,0 +1,73 @@
+@{
+    ViewData["Title"] = "Become a Teacher";
+}
+
+<div class="container-fluid bg-primary py-5 mb-5 page-header">
+    <div class="container py-5">
+        <h1 class="display-4 text-white text-center mb-0">Become a Teacher</h1>
+    </div>
+</div>
+
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="text-center mx-auto mb-5" style="max-width: 650px;">
+            <h5 class="text-primary text-uppercase">Join Our Team</h5>
+            <h1 class="mb-3">Share Your Knowledge</h1>
+            <p class="text-muted mb-0">
+                Want to teach on our platform? Tell us about yourself below. Our team reviews every
+                application, and once approved you'll get your own teacher profile and a login to
+                message students and track their progress.
+            </p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                @if (TempData["ApplySuccess"] != null)
+                {
+                    <div class="alert alert-success">@TempData["ApplySuccess"]</div>
+                }
+                @if (TempData["ApplyError"] != null)
+                {
+                    <div class="alert alert-danger">@TempData["ApplyError"]</div>
+                }
+                <form asp-controller="Home" asp-action="BecomeTeacher" method="post">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" name="firstName" class="form-control" id="firstName" placeholder="First Name" required>
+                                <label for="firstName">First Name</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" name="lastName" class="form-control" id="lastName" placeholder="Last Name" required>
+                                <label for="lastName">Last Name</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="email" name="email" class="form-control" id="email" placeholder="Email" required>
+                                <label for="email">Email</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" name="subject" class="form-control" id="subject" placeholder="Subject you'd like to teach" required>
+                                <label for="subject">Subject you'd like to teach</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-floating">
+                                <textarea name="bio" class="form-control" placeholder="Tell us about your background" id="bio" style="height: 150px" required></textarea>
+                                <label for="bio">Tell us about your background</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <button class="btn btn-primary w-100 py-3" type="submit">Submit Application</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

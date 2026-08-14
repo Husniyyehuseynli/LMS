@@ -1,0 +1,237 @@
+@model List<Course>
+@{
+    ViewData["Title"] = "Home";
+    List<Category> categories = ViewBag.Categories;
+}
+
+<!-- Hero Start -->
+<div class="container-fluid bg-primary py-5 mb-5 hero-header">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 text-center">
+                <h1 class="display-3 text-white mb-4">Progress in Knowledge, Success in Results</h1>
+                <p class="fs-5 text-white-50 mb-4 pb-2">Enroll in courses, watch the lessons, test your knowledge with quizzes — prove your results with a certificate.</p>
+                <a asp-controller="Course" asp-action="Index" class="btn btn-light py-3 px-5 me-3">Browse Courses</a>
+                @if (User.Identity == null || !User.Identity.IsAuthenticated)
+                {
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-outline-light py-3 px-5">Register Now</a>
+                }
+
+                <div class="row justify-content-center mt-5 pt-3">
+                    <div class="col-4 col-md-3 text-center">
+                        <div class="hero-stat-num" data-count="500" data-suffix="+">0</div>
+                        <div class="hero-stat-label">Students</div>
+                    </div>
+                    <div class="col-4 col-md-3 text-center">
+                        <div class="hero-stat-num" data-count="@ViewBag.CourseCount">0</div>
+                        <div class="hero-stat-label">Courses</div>
+                    </div>
+                    <div class="col-4 col-md-3 text-center">
+                        <div class="hero-stat-num" data-count="@ViewBag.TeacherCount">0</div>
+                        <div class="hero-stat-label">Teachers</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Hero End -->
+
+<!-- Categories Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="text-center mx-auto mb-5" data-reveal style="max-width: 600px;">
+            <h5 class="text-primary text-uppercase">Course Categories</h5>
+            <h1 class="mb-0">Browse by Category</h1>
+        </div>
+        <div class="row g-4">
+            @if (categories != null && categories.Any())
+            {
+                int catIndex = 0;
+                foreach (var cat in categories)
+                {
+                    catIndex++;
+                    int imgNumber = ((catIndex - 1) % 4) + 1;
+                    <div class="col-lg-3 col-sm-6" data-reveal>
+                        <a asp-controller="Course" asp-action="Index" asp-route-categoryId="@cat.Id" class="text-decoration-none">
+                            <div class="cat-item rounded shadow-sm h-100 overflow-hidden">
+                                <div class="position-relative">
+                                    <img class="img-fluid w-100" style="height:130px;object-fit:cover;" src="~/img/cat-@(imgNumber).jpg" alt="@cat.Name">
+                                    <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background:rgba(13,44,84,0.35);">
+                                        <i class="fa fa-2x @cat.Icon.ToFaClass() text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="p-3 text-center">
+                                    <h6 class="mb-2 text-dark">@cat.Name</h6>
+                                    <p class="mb-0 text-muted small">@(cat.Courses?.Count(c => !c.IsDeleted) ?? 0) Courses</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="text-center text-muted">No categories have been added yet.</p>
+            }
+        </div>
+    </div>
+</div>
+<!-- Categories End -->
+
+<!-- Featured Courses Start -->
+<div class="container-xxl py-5 bg-light">
+    <div class="container">
+        <div class="text-center mx-auto mb-5" data-reveal style="max-width: 600px;">
+            <h5 class="text-primary text-uppercase">Featured Courses</h5>
+            <h1 class="mb-0">Most Popular Courses</h1>
+        </div>
+        <div class="row g-4">
+            @if (Model != null && Model.Any())
+            {
+                foreach (var course in Model)
+                {
+                    <div class="col-lg-4 col-md-6" data-reveal>
+                        <div class="course-item bg-white shadow-sm rounded h-100">
+                            <div class="position-relative overflow-hidden">
+                                <img class="img-fluid w-100" style="height:220px;object-fit:cover;" src="@(string.IsNullOrEmpty(course.ImageUrl) ? Url.Content($"~/img/course-{(course.Id % 3) + 1}.jpg") : Url.Content("~/uploads/courses/" + course.ImageUrl))" alt="@course.Name" onerror="this.onerror=null;this.src='@Url.Content("~/img/course-1.jpg")'">
+                                <div class="w-100 d-flex justify-content-between position-absolute bottom-0 start-0 p-3">
+                                    <span class="badge bg-primary">@course.Category?.Name</span>
+                                    <span class="badge bg-dark"><i class="fa fa-clock me-1"></i>@course.DurationHours hours</span>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <h5 class="mb-2">@course.Name</h5>
+                                <p class="text-muted mb-3">@course.ShortDescription</p>
+                                <p class="mb-3 small"><i class="fa fa-user-tie text-primary me-2"></i>@course.InstructorName</p>
+                                <a asp-controller="Course" asp-action="Details" asp-route-id="@course.Id" class="btn btn-primary w-100">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="text-center text-muted">No courses have been added yet.</p>
+            }
+        </div>
+    </div>
+</div>
+<!-- Featured Courses End -->
+
+<!-- Platform Features Start -->
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="text-center mx-auto mb-5" data-reveal style="max-width: 600px;">
+            <h5 class="text-primary text-uppercase">Why Choose Us</h5>
+            <h1 class="mb-0">Everything You Need to Learn</h1>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6" data-reveal>
+                <a asp-controller="Course" asp-action="Index" class="text-decoration-none text-dark">
+                    <div class="feature-card h-100 p-4 text-center">
+                        <div class="feature-icon mx-auto mb-3"><i class="fa fa-photo-video"></i></div>
+                        <h5 class="mb-2">Structured Lessons</h5>
+                        <p class="text-muted mb-0">Every course is broken into clear, ordered lessons so you always know what's next.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-4 col-md-6" data-reveal>
+                <a asp-controller="Course" asp-action="Index" class="text-decoration-none text-dark">
+                    <div class="feature-card h-100 p-4 text-center">
+                        <div class="feature-icon mx-auto mb-3"><i class="fa fa-certificate"></i></div>
+                        <h5 class="mb-2">Quizzes &amp; Certificates</h5>
+                        <p class="text-muted mb-0">Test what you've learned with quizzes, then earn a certificate once you pass.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-4 col-md-6" data-reveal>
+                <a asp-controller="Dashboard" asp-action="Index" class="text-decoration-none text-dark">
+                    <div class="feature-card h-100 p-4 text-center">
+                        <div class="feature-icon mx-auto mb-3"><i class="fa fa-chart-line"></i></div>
+                        <h5 class="mb-2">Progress Tracking</h5>
+                        <p class="text-muted mb-0">See exactly how far you've come in every course, lesson by lesson.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-4 col-md-6" data-reveal>
+                <a asp-controller="Course" asp-action="Index" class="text-decoration-none text-dark">
+                    <div class="feature-card h-100 p-4 text-center">
+                        <div class="feature-icon mx-auto mb-3"><i class="fa fa-star"></i></div>
+                        <h5 class="mb-2">Real Student Reviews</h5>
+                        <p class="text-muted mb-0">Every course is rated and reviewed by students who've actually taken it.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-lg-4 col-md-6" data-reveal>
+                <a asp-controller="Teacher" asp-action="Index" class="text-decoration-none text-dark">
+                    <div class="feature-card h-100 p-4 text-center">
+                        <div class="feature-icon mx-auto mb-3"><i class="fa fa-comments"></i></div>
+                        <h5 class="mb-2">Direct Instructor Chat</h5>
+                        <p class="text-muted mb-0">Message your instructor directly whenever you have a question about a course.</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Platform Features End -->
+
+<!-- How It Works Start -->
+<div class="container-fluid bg-dark py-5">
+    <div class="container py-5">
+        <div class="text-center mx-auto mb-5" data-reveal style="max-width: 600px;">
+            <h5 class="text-accent text-uppercase">Getting Started</h5>
+            <h1 class="text-white mb-0">How It Works</h1>
+        </div>
+        <div class="row g-4 how-it-works">
+            <div class="col-md-3" data-reveal>
+                <a asp-controller="Course" asp-action="Index" class="text-decoration-none">
+                    <div class="step-card text-center">
+                        <div class="step-num">1</div>
+                        <i class="fa fa-search step-icon"></i>
+                        <h6 class="text-white mt-3 mb-2">Browse &amp; Enroll</h6>
+                        <p class="text-white-50 small mb-0">Find a course that matches your goals and enroll in a click.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3" data-reveal>
+                <a asp-controller="Course" asp-action="Index" class="text-decoration-none">
+                    <div class="step-card text-center">
+                        <div class="step-num">2</div>
+                        <i class="fa fa-play-circle step-icon"></i>
+                        <h6 class="text-white mt-3 mb-2">Watch the Lessons</h6>
+                        <p class="text-white-50 small mb-0">Work through the curriculum at your own pace, lesson by lesson.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3" data-reveal>
+                <a asp-controller="Course" asp-action="Index" class="text-decoration-none">
+                    <div class="step-card text-center">
+                        <div class="step-num">3</div>
+                        <i class="fa fa-question step-icon"></i>
+                        <h6 class="text-white mt-3 mb-2">Take the Quizzes</h6>
+                        <p class="text-white-50 small mb-0">Check your understanding with short quizzes after each course.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3" data-reveal>
+                <a asp-controller="@(User.Identity != null && User.Identity.IsAuthenticated ? "Dashboard" : "Account")" asp-action="@(User.Identity != null && User.Identity.IsAuthenticated ? "Index" : "Register")" class="text-decoration-none">
+                    <div class="step-card text-center">
+                        <div class="step-num">4</div>
+                        <i class="fa fa-award step-icon"></i>
+                        <h6 class="text-white mt-3 mb-2">Earn Your Certificate</h6>
+                        <p class="text-white-50 small mb-0">Pass the quizzes and download a certificate to show what you've learned.</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+        @if (User.Identity == null || !User.Identity.IsAuthenticated)
+        {
+            <div class="text-center mt-5">
+                <a asp-controller="Account" asp-action="Register" class="btn btn-accent py-3 px-5">Get Started for Free</a>
+            </div>
+        }
+    </div>
+</div>
+<!-- How It Works End -->

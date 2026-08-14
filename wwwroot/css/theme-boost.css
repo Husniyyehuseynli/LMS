@@ -1,0 +1,228 @@
+/* ==============================================================
+   DOST-inspired premium theme layer for the LMS.
+   Loaded AFTER bootstrap.min.css and style.css so it can safely
+   layer new visual polish without touching the base template.
+   ============================================================== */
+
+:root {
+    /* Secondary accent — indigo (matches the project's primary blue), used for highlights, badges, CTAs */
+    --accent: #4F46E5;
+    --accent-dark: #4338CA;
+    --accent-light: #EEF2FF;
+
+    /* Design tokens */
+    --radius-sm: 8px;
+    --radius: 14px;
+    --radius-lg: 22px;
+    --shadow-sm: 0 1px 3px rgba(24, 29, 56, .08);
+    --shadow: 0 8px 24px rgba(24, 29, 56, .10);
+    --shadow-lg: 0 16px 44px rgba(24, 29, 56, .16);
+    --t: .25s cubic-bezier(.4, 0, .2, 1);
+    --t-slow: .5s cubic-bezier(.16, .84, .44, 1);
+}
+
+/* ---------- Accent utility classes ---------- */
+.text-accent { color: var(--accent) !important; }
+.bg-accent { background: var(--accent) !important; color: #fff !important; }
+.btn-accent {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 700;
+}
+.btn-accent:hover {
+    background: var(--accent-dark);
+    border-color: var(--accent-dark);
+    color: #fff;
+}
+.badge-accent {
+    background: var(--accent-light);
+    color: var(--accent-dark);
+    font-weight: 700;
+}
+
+/* ---------- Softer, more premium corners + shadows on key surfaces ---------- */
+.card,
+.cat-item,
+.rounded,
+.list-group-item:first-child,
+.list-group-item:last-child {
+    border-radius: var(--radius) !important;
+}
+.card, .cat-item {
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--t), box-shadow var(--t);
+}
+.card:hover, .cat-item:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow);
+}
+
+/* ---------- Buttons feel a touch more tactile ---------- */
+.btn {
+    border-radius: var(--radius-sm);
+    transition: transform var(--t-fast, .15s ease), box-shadow var(--t), background var(--t), border-color var(--t);
+}
+.btn:active { transform: translateY(1px); }
+.btn-primary:hover, .btn-outline-primary:hover {
+    box-shadow: 0 6px 16px rgba(79, 70, 229, .28);
+}
+
+/* ---------- Fix: bootstrap.min.css still ships old teal hover/active
+   shades from before the theme's primary color was changed to indigo.
+   These overrides keep every interactive state of .btn-primary in the
+   same indigo family instead of flashing the old teal on click. ---------- */
+.btn-primary:hover {
+    background-color: #4338CA;
+    border-color: #4338CA;
+}
+.btn-check:focus + .btn-primary,
+.btn-primary:focus {
+    background-color: #4338CA;
+    border-color: #4338CA;
+    box-shadow: 0 0 0 .25rem rgba(79, 70, 229, .5);
+}
+.btn-check:checked + .btn-primary,
+.btn-check:active + .btn-primary,
+.btn-primary:active,
+.btn-primary.active,
+.show > .btn-primary.dropdown-toggle {
+    background-color: #3730A3;
+    border-color: #3730A3;
+}
+.btn-check:checked + .btn-primary:focus,
+.btn-check:active + .btn-primary:focus,
+.btn-primary:active:focus,
+.btn-primary.active:focus,
+.show > .btn-primary.dropdown-toggle:focus {
+    box-shadow: 0 0 0 .25rem rgba(79, 70, 229, .5);
+}
+
+/* ---------- Sticky header shadow on scroll ---------- */
+.navbar.scrolled {
+    box-shadow: var(--shadow);
+}
+
+/* ---------- Animated hero stat counters ---------- */
+.hero-stat-num {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1;
+}
+.hero-stat-label {
+    font-size: .85rem;
+    color: rgba(255, 255, 255, .8);
+    margin-top: .25rem;
+}
+
+/* ---------- Scroll-reveal (mirrors DostProject's [data-reveal] pattern) ---------- */
+[data-reveal] {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity .6s ease, transform .6s ease;
+}
+[data-reveal].revealed {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}
+
+/* ---------- Toast notifications (mirrors DostProject's dostToast) ---------- */
+.toast-lms {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 2000;
+    background: var(--dark);
+    color: #fff;
+    padding: .85rem 1.25rem;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-lg);
+    font-weight: 600;
+    font-size: .9rem;
+    max-width: 320px;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity .3s ease, transform .3s ease;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+.toast-lms.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+.toast-lms.success { background: #0b8a52; }
+.toast-lms.error { background: #c0392b; }
+
+/* ---------- Notification dropdown polish ---------- */
+#notifDropdown .notif-row a {
+    border-radius: var(--radius-sm);
+}
+#notifDropdown .notif-row a:hover {
+    background: var(--light);
+}
+
+/* ---------- Home page: Platform Features cards ---------- */
+.feature-card {
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    transition: transform var(--t), box-shadow var(--t);
+}
+.feature-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow);
+}
+.feature-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--light);
+    color: var(--primary);
+    font-size: 1.6rem;
+}
+
+/* ---------- Home page: How It Works (dark section) ---------- */
+.how-it-works .step-card {
+    position: relative;
+    padding: 0 .5rem;
+    transition: transform .2s ease;
+}
+.how-it-works a:hover .step-card {
+    transform: translateY(-4px);
+}
+.how-it-works .step-num {
+    width: 34px;
+    height: 34px;
+    margin: 0 auto;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .95rem;
+}
+.how-it-works .step-icon {
+    font-size: 1.75rem;
+    color: var(--accent);
+    margin-top: .75rem;
+    display: block;
+}
+/* Connecting line between steps on larger screens */
+@media (min-width: 768px) {
+    .how-it-works .col-md-3:not(:last-child) .step-card::after {
+        content: "";
+        position: absolute;
+        top: 17px;
+        left: calc(50% + 34px);
+        width: calc(100% - 34px);
+        height: 2px;
+        background: rgba(255, 255, 255, .15);
+    }
+}

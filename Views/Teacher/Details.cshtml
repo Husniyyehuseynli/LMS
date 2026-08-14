@@ -1,0 +1,143 @@
+@model Teacher
+@{
+    ViewData["Title"] = Model.FullName;
+    bool canMessage = ViewBag.CanMessage;
+    bool hasReviewed = ViewBag.HasReviewed;
+    bool isStudent = ViewBag.IsStudent;
+    double avgRating = ViewBag.AverageRating;
+    int reviewCount = ViewBag.ReviewCount;
+    List<TeacherReview> reviews = ViewBag.Reviews;
+}
+
+<div class="container-fluid bg-primary py-5 mb-5 page-header">
+    <div class="container py-5">
+        <img src="@Url.Content(LMS.Utilites.TeacherPhotoHelper.GetDisplayPhotoUrl(Model.Id, Model.PhotoUrl))" alt="@Model.FullName" class="mx-auto mb-3 rounded-circle d-block" style="width:110px;height:110px;object-fit:cover;border:3px solid #fff;" onerror="this.onerror=null;this.src='@Url.Content("~/img/team-1.jpg")'">
+        <h1 class="display-4 text-white text-center mb-2">@Model.FullName</h1>
+        <p class="text-white text-center mb-2">@Model.Subject Teacher</p>
+        <div class="text-center">
+            @for (int i = 1; i <= 5; i++)
+            {
+                <i class="fa fa-star @(i <= Math.Round(avgRating) ? "text-warning" : "text-white-50")"></i>
+            }
+            <span class="text-white ms-2">@avgRating.ToString("0.0") (@reviewCount review@(reviewCount == 1 ? "" : "s"))</span>
+        </div>
+    </div>
+</div>
+
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row g-5">
+            <div class="col-lg-8">
+                <h4 class="mb-3"><i class="fa fa-info-circle text-primary me-2"></i>About</h4>
+                <p>@Model.Bio</p>
+
+                <h4 class="mt-5 mb-3"><i class="fa fa-graduation-cap text-primary me-2"></i>Courses Taught</h4>
+                @if (Model.Courses != null && Model.Courses.Any(c => !c.IsDeleted))
+                {
+                    <div class="row g-3">
+                        @foreach (var course in Model.Courses.Where(c => !c.IsDeleted))
+                        {
+                            <div class="col-md-6">
+                                <a asp-controller="Course" asp-action="Details" asp-route-id="@course.Id" class="text-decoration-none">
+                                    <div class="border rounded p-3 h-100">
+                                        <span class="badge bg-primary mb-2">@course.Category?.Name</span>
+                                        <h6 class="mb-1 text-dark">@course.Name</h6>
+                                        <p class="text-muted small mb-0">@course.ShortDescription</p>
+                                    </div>
+                                </a>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No courses assigned yet.</p>
+                }
+
+                <h4 class="mt-5 mb-3"><i class="fa fa-star text-primary me-2"></i>Student Reviews</h4>
+
+                @if (isStudent)
+                {
+                    <form asp-controller="Teacher" asp-action="Review" method="post" class="bg-light rounded p-4 mb-4">
+                        <input type="hidden" name="teacherId" value="@Model.Id" />
+                        <label class="form-label fw-bold">@(hasReviewed ? "Update your review" : "Leave a review")</label>
+                        <div class="mb-3">
+                            <select name="rating" class="form-select" style="max-width:160px;">
+                                <option value="5">5 - Excellent</option>
+                                <option value="4">4 - Good</option>
+                                <option value="3">3 - Average</option>
+                                <option value="2">2 - Below Average</option>
+                                <option value="1">1 - Poor</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <textarea name="comment" class="form-control" rows="3" placeholder="Share your thoughts about this teacher (optional)"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit Review</button>
+                    </form>
+                }
+                else if (User.Identity != null && User.Identity.IsAuthenticated)
+                {
+                    <p class="text-muted">Only students can leave a review.</p>
+                }
+
+                @if (reviews != null && reviews.Any())
+                {
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var review in reviews)
+                        {
+                            <div class="border rounded p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <strong>@review.Student?.Name @review.Student?.Surname</strong>
+                                    <span class="text-muted small">@review.CreatedDate.ToString("dd.MM.yyyy")</span>
+                                </div>
+                                <div class="mb-2">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="fa fa-star @(i <= review.Rating ? "text-warning" : "text-muted")"></i>
+                                    }
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(review.Comment))
+                                {
+                                    <p class="mb-0">@review.Comment</p>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No reviews yet. Be the first to share your experience!</p>
+                }
+            </div>
+
+            <div class="col-lg-4">
+                <div class="bg-light rounded p-4">
+                    <h5 class="mb-3">Contact</h5>
+                    <p class="mb-2"><i class="fa fa-book me-2 text-primary"></i>@Model.Subject</p>
+                    @if (!string.IsNullOrWhiteSpace(Model.Email))
+                    {
+                        <p class="mb-3"><i class="fa fa-envelope me-2 text-primary"></i>@Model.Email</p>
+                    }
+
+                    @if (canMessage)
+                    {
+                        <a asp-controller="Chat" asp-action="Conversation" asp-route-id="@Model.AppUserId" class="btn btn-primary w-100">
+                            <i class="fa fa-comments me-2"></i>Message @Model.FirstName
+                        </a>
+                    }
+                    else if (User.Identity == null || !User.Identity.IsAuthenticated)
+                    {
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary w-100">
+                            <i class="fa fa-sign-in-alt me-2"></i>Login to message this teacher
+                        </a>
+                    }
+                    else if (string.IsNullOrEmpty(Model.AppUserId))
+                    {
+                        <p class="text-muted small mb-0">This teacher hasn't enabled direct messaging yet.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

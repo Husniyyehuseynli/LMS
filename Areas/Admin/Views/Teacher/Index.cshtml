@@ -1,0 +1,74 @@
+@model List<LMS.Models.Teacher>
+@{
+    ViewData["Title"] = "Teachers";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0">Teachers</h5>
+    <a asp-area="Admin" asp-controller="Teacher" asp-action="Create" class="btn btn-primary"><i class="fa fa-plus me-2"></i>New Teacher</a>
+</div>
+
+<div class="card stat-card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Subject</th>
+                    <th>Courses</th>
+                    <th>Login Account</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var teacher in Model)
+                {
+                    <tr class="@(teacher.IsDeleted ? "table-secondary" : "")">
+                        <td>@teacher.Id</td>
+                        <td>@teacher.FullName</td>
+                        <td>@teacher.Subject</td>
+                        <td>@(teacher.Courses?.Count(c => !c.IsDeleted) ?? 0)</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(teacher.AppUserId))
+                            {
+                                <span class="badge bg-info text-dark">Linked</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-light text-dark">None</span>
+                            }
+                        </td>
+                        <td>
+                            @if (teacher.IsDeleted)
+                            {
+                                <span class="badge bg-secondary">Inactive</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <a asp-area="Admin" asp-controller="Teacher" asp-action="Update" asp-route-id="@teacher.Id" class="btn btn-sm btn-outline-primary"><i class="fa fa-edit"></i></a>
+                            @if (teacher.IsDeleted)
+                            {
+                                <form asp-area="Admin" asp-controller="Teacher" asp-action="Restore" asp-route-id="@teacher.Id" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-success"><i class="fa fa-undo"></i></button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form asp-area="Admin" asp-controller="Teacher" asp-action="Delete" asp-route-id="@teacher.Id" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fa fa-trash"></i></button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<p class="text-muted small mt-3">To let a teacher log in and chat with students, create their account from a registration flow or database seed with the "Teacher" role, matching this profile's email, then set the AppUserId field.</p>

@@ -1,0 +1,77 @@
+@model List<LMS.Models.TeacherApplication>
+@{
+    ViewData["Title"] = "Teacher Applications";
+}
+
+<h4 class="mb-4">Teacher Applications</h4>
+
+@if (TempData["ApplicationSuccess"] != null)
+{
+    <div class="alert alert-success">@TempData["ApplicationSuccess"]</div>
+}
+@if (TempData["ApplicationError"] != null)
+{
+    <div class="alert alert-danger">@TempData["ApplicationError"]</div>
+}
+
+<div class="card stat-card p-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Subject</th>
+                    <th>Bio</th>
+                    <th>Applied</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var app in Model)
+                    {
+                        <tr>
+                            <td>@app.FirstName @app.LastName</td>
+                            <td>@app.Email</td>
+                            <td>@app.Subject</td>
+                            <td style="max-width:280px;white-space:normal;">@app.Bio</td>
+                            <td>@app.AppliedDate.ToString("dd MMM yyyy")</td>
+                            <td>
+                                @switch (app.Status)
+                                {
+                                    case LMS.Models.ApplicationStatus.Pending:
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                        break;
+                                    case LMS.Models.ApplicationStatus.Approved:
+                                        <span class="badge bg-success">Approved</span>
+                                        break;
+                                    case LMS.Models.ApplicationStatus.Rejected:
+                                        <span class="badge bg-secondary">Rejected</span>
+                                        break;
+                                }
+                            </td>
+                            <td class="text-end">
+                                @if (app.Status == LMS.Models.ApplicationStatus.Pending)
+                                {
+                                    <form asp-action="Approve" asp-route-id="@app.Id" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-success"><i class="fa fa-check"></i> Approve</button>
+                                    </form>
+                                    <form asp-action="Reject" asp-route-id="@app.Id" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fa fa-times"></i> Reject</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="7" class="text-center text-muted">No applications yet.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,155 @@
+@using LMS.Areas.Admin.Controllers
+@{
+    ViewData["Title"] = "Reports";
+    var courseRows = ViewBag.CourseRows as List<ReportsController.CourseReportRow>;
+    var monthly = ViewBag.MonthlyEnrollments as List<ReportsController.MonthPoint>;
+    var yearly = ViewBag.YearlyEnrollments as List<ReportsController.MonthPoint>;
+}
+
+<h4 class="mb-4">Reports</h4>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-6 col-xl-3">
+        <div class="card stat-card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small">Total Students</div>
+                    <h3 class="mb-0">@ViewBag.TotalStudents</h3>
+                </div>
+                <i class="fa fa-users fa-2x text-info"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card stat-card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small">Total Enrollments</div>
+                    <h3 class="mb-0">@ViewBag.TotalEnrollments</h3>
+                </div>
+                <i class="fa fa-clipboard-list fa-2x text-primary"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card stat-card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small">Certificates Issued</div>
+                    <h3 class="mb-0">@ViewBag.TotalCertificates</h3>
+                </div>
+                <i class="fa fa-certificate fa-2x text-warning"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="card stat-card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <div class="text-muted small">Active Courses</div>
+                    <h3 class="mb-0">@ViewBag.TotalCourses</h3>
+                </div>
+                <i class="fa fa-graduation-cap fa-2x text-success"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card stat-card p-4 h-100">
+            <h6 class="mb-3">Monthly Enrollments (last 12 months)</h6>
+            <canvas id="monthlyChart" height="110"></canvas>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card stat-card p-4 h-100">
+            <h6 class="mb-3">Yearly Enrollments</h6>
+            <canvas id="yearlyChart" height="110"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="card stat-card p-4">
+    <h6 class="mb-3">Enrollments and Certificates by Course</h6>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Course</th>
+                    <th>Category</th>
+                    <th class="text-center">Enrolled Students</th>
+                    <th class="text-center">Certificates Earned</th>
+                    <th class="text-center">Completion Rate</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (courseRows != null && courseRows.Any())
+                {
+                    foreach (var row in courseRows)
+                    {
+                        double pct = row.EnrollmentCount > 0 ? Math.Round(row.CertificateCount * 100.0 / row.EnrollmentCount, 1) : 0;
+                        <tr>
+                            <td>@row.CourseName</td>
+                            <td>@row.CategoryName</td>
+                            <td class="text-center">@row.EnrollmentCount</td>
+                            <td class="text-center">@row.CertificateCount</td>
+                            <td class="text-center">@pct%</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="5" class="text-center text-muted">No data available</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <script>
+        const monthlyLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(monthly?.Select(m => m.Label)));
+        const monthlyData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(monthly?.Select(m => m.Count)));
+        const yearlyLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(yearly?.Select(y => y.Label)));
+        const yearlyData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(yearly?.Select(y => y.Count)));
+
+        new Chart(document.getElementById('monthlyChart'), {
+            type: 'line',
+            data: {
+                labels: monthlyLabels,
+                datasets: [{
+                    label: 'Qeydiyyat',
+                    data: monthlyData,
+                    borderColor: '#2b3ab2',
+                    backgroundColor: 'rgba(43,58,178,0.12)',
+                    tension: 0.35,
+                    fill: true,
+                    pointRadius: 3
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+            }
+        });
+
+        new Chart(document.getElementById('yearlyChart'), {
+            type: 'bar',
+            data: {
+                labels: yearlyLabels,
+                datasets: [{
+                    label: 'Qeydiyyat',
+                    data: yearlyData,
+                    backgroundColor: '#f6b93b',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+            }
+        });
+    </script>
+}

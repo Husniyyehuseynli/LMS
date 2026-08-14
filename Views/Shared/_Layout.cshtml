@@ -1,0 +1,231 @@
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<AppUser> SignInManager
+@inject UserManager<AppUser> UserManager
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>@ViewData["Title"] - LMS | Learning Management System</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <link href="~/img/favicon.ico" rel="icon">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <link href="~/lib/animate/animate.min.css" rel="stylesheet">
+    <link href="~/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+
+    <link href="~/css/bootstrap.min.css" rel="stylesheet">
+    <link href="~/css/style.css" rel="stylesheet" asp-append-version="true">
+    <link href="~/css/theme-boost.css" rel="stylesheet" asp-append-version="true">
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+
+<body>
+    <!-- Navbar Start -->
+    <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
+        <a asp-controller="Home" asp-action="Index" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
+            <h2 class="m-0 text-primary"><i class="fa fa-book me-3"></i>LMS</h2>
+        </a>
+        <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <div class="navbar-nav ms-auto p-4 p-lg-0">
+                <a asp-controller="Home" asp-action="Index" class="nav-item nav-link">Home</a>
+                <a asp-controller="Home" asp-action="About" class="nav-item nav-link">About</a>
+                <a asp-controller="Course" asp-action="Index" class="nav-item nav-link">Courses</a>
+                <a asp-controller="Teacher" asp-action="Index" class="nav-item nav-link">Teachers</a>
+                @if (SignInManager.IsSignedIn(User))
+                {
+                    @if (User.IsInRole("Student"))
+                    {
+                        <a asp-controller="Dashboard" asp-action="Index" class="nav-item nav-link">My Courses</a>
+                    }
+                    @if (!User.IsInRole("Admin") && !User.IsInRole("Instructor"))
+                    {
+                        <a asp-controller="Chat" asp-action="Index" class="nav-item nav-link">Messages</a>
+                    }
+                }
+                @if (!SignInManager.IsSignedIn(User) || User.IsInRole("Student"))
+                {
+                    <a asp-controller="Home" asp-action="Contact" class="nav-item nav-link">Contact</a>
+                }
+            </div>
+            @if (SignInManager.IsSignedIn(User))
+            {
+                <div class="dropdown me-2">
+                    <a href="#" class="btn btn-light py-3 px-3 d-lg-block dropdown-toggle position-relative" data-bs-toggle="dropdown" id="notifBell">
+                        <i class="fa fa-bell"></i>
+                        <span id="notifBadge" class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle d-none" style="font-size:0.6rem;">0</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end p-2" id="notifDropdown" style="min-width:320px;max-height:400px;overflow-y:auto;">
+                        <li class="text-muted small px-2 pb-2">Notifications</li>
+                        <li id="notifEmpty" class="px-2 text-muted small">Nothing new.</li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-center small" asp-controller="Notification" asp-action="Index">View all</a></li>
+                    </ul>
+                </div>
+                <div class="dropdown">
+                    <a href="#" class="btn btn-primary py-3 px-lg-4 d-lg-block dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="fa fa-user-circle me-2"></i>@{
+                            AppUser? navUser = await UserManager.GetUserAsync(User);
+                        }@(navUser != null ? $"{navUser.Name} {navUser.Surname}" : UserManager.GetUserName(User))
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        @if (User.IsInRole("Admin") || User.IsInRole("Instructor"))
+                        {
+                            <li><a class="dropdown-item" asp-area="Admin" asp-controller="Dashboard" asp-action="Index"><i class="fa fa-cogs me-2"></i>Admin Panel</a></li>
+                        }
+                        @if (User.IsInRole("Teacher"))
+                        {
+                            <li><a class="dropdown-item" asp-controller="Dashboard" asp-action="TeachingProgress"><i class="fa fa-chart-line me-2"></i>My Students' Progress</a></li>
+                            <li><a class="dropdown-item" asp-controller="Teacher" asp-action="Switch"><i class="fa fa-right-left me-2"></i>Switch Teacher Account</a></li>
+                        }
+                        <li><a class="dropdown-item" asp-controller="Dashboard" asp-action="Index"><i class="fa fa-graduation-cap me-2"></i>My Courses</a></li>
+                        <li>
+                            <form asp-controller="Account" asp-action="Logout" method="post">
+                                <button type="submit" class="dropdown-item"><i class="fa fa-sign-out-alt me-2"></i>Logout</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            }
+            else
+            {
+                <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary py-3 px-lg-4 me-2 d-lg-block">Login</a>
+                <a asp-controller="Account" asp-action="Register" class="btn btn-primary py-3 px-lg-4 d-lg-block">Register<i class="fa fa-arrow-right ms-3"></i></a>
+            }
+        </div>
+    </nav>
+    <!-- Navbar End -->
+
+    @RenderBody()
+
+    <!-- Footer Start -->
+    <div class="container-fluid bg-dark text-light footer pt-5 mt-5">
+        <div class="container py-5">
+            <div class="row g-5">
+                <div class="col-lg-4 col-md-6">
+                    <h4 class="text-white mb-3"><i class="fa fa-book me-2"></i>LMS</h4>
+                    <p>Learning Management System — a platform for courses, quizzes, and student tracking.</p>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <h4 class="text-white mb-3">Quick Link</h4>
+                    <a class="btn btn-link" asp-controller="Home" asp-action="About">About Us</a>
+                    <a class="btn btn-link" asp-controller="Course" asp-action="Index">Courses</a>
+                    @if (!SignInManager.IsSignedIn(User) || User.IsInRole("Student"))
+                    {
+                        <a class="btn btn-link" asp-controller="Home" asp-action="Contact">Contact Us</a>
+                    }
+                    @if (!User.IsInRole("Teacher") && !User.IsInRole("Admin") && !User.IsInRole("Instructor"))
+                    {
+                        <a class="btn btn-link" asp-controller="Home" asp-action="BecomeTeacher">Become a Teacher</a>
+                    }
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <h4 class="text-white mb-3">Contact</h4>
+                    <p class="mb-2"><i class="fa fa-map-marker-alt me-3"></i>Baku, Azerbaijan</p>
+                    <p class="mb-2"><i class="fa fa-envelope me-3"></i>contact@lms-platform.com</p>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="copyright py-4">
+                <div class="row">
+                    <div class="col-md-12 text-center">
+                        &copy; @DateTime.Now.Year <a class="border-bottom text-light" href="#">LMS</a>. All Rights Reserved.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Footer End -->
+
+    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/wow/wow.min.js"></script>
+    <script src="~/lib/easing/easing.min.js"></script>
+    <script src="~/lib/waypoints/waypoints.min.js"></script>
+    <script src="~/lib/owlcarousel/owl.carousel.min.js"></script>
+    <script src="~/js/main.js"></script>
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <script>
+            (function () {
+                var badge = document.getElementById('notifBadge');
+                var dropdown = document.getElementById('notifDropdown');
+                var emptyItem = document.getElementById('notifEmpty');
+
+                function escapeHtml(text) {
+                    var div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
+                }
+
+                function refresh() {
+                    fetch('/Notification/Unread')
+                        .then(function (res) { return res.ok ? res.json() : null; })
+                        .then(function (data) {
+                            if (!data) return;
+
+                            if (data.unreadCount > 0) {
+                                badge.textContent = data.unreadCount > 9 ? '9+' : data.unreadCount;
+                                badge.classList.remove('d-none');
+                            } else {
+                                badge.classList.add('d-none');
+                            }
+
+                            dropdown.querySelectorAll('.notif-row').forEach(function (el) { el.remove(); });
+
+                            if (data.recent.length === 0) {
+                                emptyItem.classList.remove('d-none');
+                                return;
+                            }
+                            emptyItem.classList.add('d-none');
+
+                            var insertAfter = emptyItem;
+                            data.recent.forEach(function (n) {
+                                var li = document.createElement('li');
+                                li.className = 'notif-row';
+                                var a = document.createElement('a');
+                                a.href = n.url || '#';
+                                a.className = 'dropdown-item small py-2' + (n.isRead ? '' : ' fw-semibold bg-light');
+                                var titleHtml = n.title ? '<div>' + escapeHtml(n.icon || '🔔') + ' ' + escapeHtml(n.title) + '</div>' : '';
+                                a.innerHTML = titleHtml +
+                                    '<div class="' + (n.title ? 'text-muted fw-normal' : '') + '">' + (n.title ? '' : escapeHtml(n.icon || '🔔') + ' ') + escapeHtml(n.message) + '</div>' +
+                                    '<div class="text-muted" style="font-size:0.75rem;">' + n.createdDate + '</div>';
+                                a.addEventListener('click', function () {
+                                    if (!n.isRead) {
+                                        fetch('/Notification/MarkRead', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                            body: 'id=' + n.id
+                                        });
+                                    }
+                                });
+                                li.appendChild(a);
+                                insertAfter.insertAdjacentElement('afterend', li);
+                                insertAfter = li;
+                            });
+                        })
+                        .catch(function () { /* silently ignore - not critical to page function */ });
+                }
+
+                refresh();
+                setInterval(refresh, 30000);
+            })();
+        </script>
+    }
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+
+</html>

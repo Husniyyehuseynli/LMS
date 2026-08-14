@@ -1,0 +1,88 @@
+@model List<Notification>
+@{
+    ViewData["Title"] = "Notifications";
+    string filter = ViewBag.Filter ?? "all";
+}
+
+<div class="container py-5" style="max-width:700px;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Notifications</h3>
+        @if (Model.Any(n => !n.IsRead))
+        {
+            <button type="button" id="markAllReadBtn" class="btn btn-sm btn-outline-secondary">Mark all as read</button>
+        }
+    </div>
+
+    <ul class="nav nav-pills mb-4">
+        <li class="nav-item">
+            <a class="nav-link @(filter == "all" ? "active" : "")" asp-action="Index" asp-route-filter="all">All</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(filter == "unread" ? "active" : "")" asp-action="Index" asp-route-filter="unread">
+                Unread @(ViewBag.UnreadCount > 0 ? $"({ViewBag.UnreadCount})" : "")
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(filter == "read" ? "active" : "")" asp-action="Index" asp-route-filter="read">Read</a>
+        </li>
+    </ul>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-light border">Nothing to show here.</div>
+    }
+    else
+    {
+        <div class="list-group">
+            @foreach (var n in Model)
+            {
+                <a href="@(string.IsNullOrEmpty(n.Url) ? "#" : n.Url)"
+                   class="list-group-item list-group-item-action notification-item @(n.IsRead ? "" : "fw-semibold bg-light")"
+                   data-id="@n.Id" data-read="@n.IsRead.ToString().ToLower()">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="d-flex gap-2">
+                            <span style="font-size:1.4rem;line-height:1;">@n.Icon</span>
+                            <div>
+                                @if (!string.IsNullOrEmpty(n.Title))
+                                {
+                                    <div>@n.Title</div>
+                                }
+                                <div class="@(string.IsNullOrEmpty(n.Title) ? "" : "text-muted small fw-normal")">@n.Message</div>
+                            </div>
+                        </div>
+                        @if (!n.IsRead)
+                        {
+                            <span class="badge bg-primary rounded-pill align-self-start ms-2">New</span>
+                        }
+                    </div>
+                    <div class="text-muted small mt-1">@n.CreatedDate.ToString("MMM d, yyyy HH:mm")</div>
+                </a>
+            }
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.notification-item').forEach(function (el) {
+            el.addEventListener('click', function () {
+                if (el.dataset.read === 'false') {
+                    fetch('/Notification/MarkRead', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: 'id=' + el.dataset.id
+                    });
+                }
+            });
+        });
+
+        var markAllBtn = document.getElementById('markAllReadBtn');
+        if (markAllBtn) {
+            markAllBtn.addEventListener('click', function () {
+                fetch('/Notification/MarkAllRead', { method: 'POST' }).then(function () {
+                    location.reload();
+                });
+            });
+        }
+    </script>
+}

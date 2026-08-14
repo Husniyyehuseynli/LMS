@@ -1,0 +1,109 @@
+@model List<Teacher>
+@{
+    ViewData["Title"] = "Teachers";
+    List<string> subjects = ViewBag.Subjects;
+    string? selectedSubject = ViewBag.SelectedSubject;
+}
+
+<div class="container-fluid bg-primary py-5 mb-5 page-header">
+    <div class="container py-5">
+        <h1 class="display-4 text-white text-center mb-0">Our Teachers</h1>
+        <p class="text-white text-center mb-0">Meet the teachers behind Entrance Exam Preparation and all other subjects.</p>
+    </div>
+</div>
+
+@if (!User.IsInRole("Teacher") && !User.IsInRole("Admin") && !User.IsInRole("Instructor"))
+{
+    <div class="container-xxl">
+        <div class="container mb-5">
+            <div class="bg-light rounded p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <span><i class="fa fa-chalkboard-teacher text-primary me-2"></i>Want to teach on our platform?</span>
+                <a asp-controller="Home" asp-action="BecomeTeacher" class="btn btn-primary">Apply to Become a Teacher</a>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-3">
+                <div class="bg-light rounded p-4">
+                    <h5 class="mb-3">Subjects</h5>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <a asp-controller="Teacher" asp-action="Index" class="text-decoration-none @(selectedSubject == null ? "fw-bold text-primary" : "text-dark")">
+                                <i class="fa fa-angle-right me-2"></i>All Teachers
+                            </a>
+                        </li>
+                        @if (subjects != null)
+                        {
+                            foreach (var subject in subjects)
+                            {
+                                <li class="mb-2">
+                                    <a asp-controller="Teacher" asp-action="Index" asp-route-subject="@subject" class="text-decoration-none @(selectedSubject == subject ? "fw-bold text-primary" : "text-dark")">
+                                        <i class="fa fa-angle-right me-2"></i>@subject
+                                    </a>
+                                </li>
+                            }
+                        }
+                    </ul>
+                </div>
+
+                <div class="bg-light rounded p-4 mt-4">
+                    <h5 class="mb-3">Popular Courses</h5>
+                    <ul class="list-unstyled mb-0">
+                        @if (ViewBag.PopularCourses != null)
+                        {
+                            foreach (var course in ViewBag.PopularCourses)
+                            {
+                                <li class="mb-3 pb-3 border-bottom">
+                                    <a asp-controller="Course" asp-action="Details" asp-route-id="@course.Id" class="text-decoration-none text-dark fw-bold d-block">
+                                        @course.Name
+                                    </a>
+                                    <small class="text-muted"><i class="fa fa-user-tie me-1"></i>@course.InstructorName</small>
+                                </li>
+                            }
+                        }
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-lg-9">
+                <div class="row g-4">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var teacher in Model)
+                        {
+                            double avg = teacher.Reviews != null && teacher.Reviews.Any(r => !r.IsDeleted)
+                                ? Math.Round(teacher.Reviews.Where(r => !r.IsDeleted).Average(r => r.Rating), 1)
+                                : 5;
+                            int reviewCount = teacher.Reviews?.Count(r => !r.IsDeleted) ?? 0;
+
+                            <div class="col-md-6">
+                                <div class="course-item bg-white shadow-sm rounded h-100 p-4 text-center">
+                                    <img src="@Url.Content(LMS.Utilites.TeacherPhotoHelper.GetDisplayPhotoUrl(teacher.Id, teacher.PhotoUrl))" alt="@teacher.FullName" class="mx-auto mb-3 rounded-circle" style="width:90px;height:90px;object-fit:cover;" onerror="this.onerror=null;this.src='@Url.Content("~/img/team-1.jpg")'">
+                                    <h5 class="mb-1">@teacher.FullName</h5>
+                                    <span class="badge bg-primary mb-2">@teacher.Subject</span>
+                                    <p class="text-muted small mb-2">@(teacher.Courses?.Count(c => !c.IsDeleted) ?? 0) course(s)</p>
+                                    <div class="mb-3">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <i class="fa fa-star @(i <= Math.Round(avg) ? "text-warning" : "text-muted")"></i>
+                                        }
+                                        <span class="text-muted small ms-1">(@reviewCount)</span>
+                                    </div>
+                                    <a asp-controller="Teacher" asp-action="Details" asp-route-id="@teacher.Id" class="btn btn-primary w-100">View Profile</a>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-center text-muted">No teachers found for this subject yet.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

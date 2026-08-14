@@ -1,0 +1,42 @@
+@model LMS.Areas.Admin.ViewModels.Lesson.UpdateLessonVM
+@{
+    ViewData["Title"] = "Edit Lesson";
+}
+
+<div class="card stat-card p-4" style="max-width:700px;">
+    <form asp-area="Admin" asp-controller="Lesson" asp-action="Update" method="post">
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="CourseId" />
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label">Lesson Title</label>
+            <input asp-for="Title" class="form-control" />
+            <span asp-validation-for="Title" class="text-danger small"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Content" class="form-label">Content / Notes</label>
+            <textarea asp-for="Content" class="form-control" rows="4"></textarea>
+            <span asp-validation-for="Content" class="text-danger small"></span>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-8">
+                <label asp-for="VideoUrl" class="form-label">Video URL</label>
+                <input asp-for="VideoUrl" class="form-control" />
+                <span asp-validation-for="VideoUrl" class="text-danger small"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="OrderIndex" class="form-label">Order</label>
+                <input asp-for="OrderIndex" type="number" class="form-control" />
+                <span asp-validation-for="OrderIndex" class="text-danger small"></span>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary"><i class="fa fa-save me-2"></i>Update</button>
+            <a asp-area="Admin" asp-controller="Course" asp-action="Lessons" asp-route-id="@Model.CourseId" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+</div>

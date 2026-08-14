@@ -1,0 +1,68 @@
+@model List<TeachingCourseSummary>
+@using LMS.Controllers
+@{
+    ViewData["Title"] = "My Students' Progress";
+}
+
+<div class="container py-5">
+    <h3 class="mb-1">My Students' Progress</h3>
+    <p class="text-muted mb-4">@ViewBag.TeacherName &middot; @Model.Count course(s)</p>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-light border">No courses are linked to your teacher profile yet.</div>
+    }
+
+    @foreach (var course in Model)
+    {
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>@course.CourseName</strong>
+                <span class="text-muted small">@course.LessonCount lesson(s) &middot; @course.Students.Count student(s)</span>
+            </div>
+            <div class="card-body p-0">
+                @if (course.LessonCount == 0)
+                {
+                    <div class="p-3 text-muted">This course has no lessons yet, so there's nothing to track.</div>
+                }
+                else if (!course.Students.Any())
+                {
+                    <div class="p-3 text-muted">No students are enrolled in this course yet.</div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Student</th>
+                                    <th style="min-width:200px;">Progress</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var student in course.Students)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div>@student.Name</div>
+                                            <div class="text-muted small">@student.Email</div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="progress flex-grow-1" style="height:8px;">
+                                                    <div class="progress-bar @(student.Percent == 100 ? "bg-success" : "bg-primary")" role="progressbar"
+                                                         style="width:@(student.Percent)%;" aria-valuenow="@student.Percent" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <span class="small text-muted" style="min-width:38px;">@student.Percent%</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,61 @@
+@model List<Quiz>
+@{
+    ViewData["Title"] = "Quizzes";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0">Quizzes</h5>
+    <a asp-area="Admin" asp-controller="Quiz" asp-action="Create" class="btn btn-primary"><i class="fa fa-plus me-2"></i>Yeni Quiz</a>
+</div>
+
+<div class="card stat-card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Title</th>
+                    <th>Course</th>
+                    <th>Question Count</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var quiz in Model)
+                {
+                    <tr class="@(quiz.IsDeleted ? "table-secondary" : "")">
+                        <td>@quiz.Title</td>
+                        <td>@quiz.Course?.Name</td>
+                        <td>@(quiz.Questions?.Count(q => !q.IsDeleted) ?? 0)</td>
+                        <td>
+                            @if (quiz.IsDeleted)
+                            {
+                                <span class="badge bg-secondary">Inactive</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <a asp-area="Admin" asp-controller="Quiz" asp-action="Questions" asp-route-id="@quiz.Id" class="btn btn-sm btn-outline-dark"><i class="fa fa-list-ol me-1"></i>Questions</a>
+                            <a asp-area="Admin" asp-controller="Quiz" asp-action="Update" asp-route-id="@quiz.Id" class="btn btn-sm btn-outline-primary"><i class="fa fa-edit"></i></a>
+                            @if (quiz.IsDeleted)
+                            {
+                                <form asp-area="Admin" asp-controller="Quiz" asp-action="Restore" asp-route-id="@quiz.Id" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-success"><i class="fa fa-undo"></i></button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form asp-area="Admin" asp-controller="Quiz" asp-action="Delete" asp-route-id="@quiz.Id" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fa fa-trash"></i></button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

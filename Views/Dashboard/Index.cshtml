@@ -1,0 +1,149 @@
+@model List<Enrollment>
+@{
+    ViewData["Title"] = "My Courses";
+    List<QuizResult> results = ViewBag.QuizResults;
+    Dictionary<int, int> completedLessonsByCourse = ViewBag.CompletedLessonsByCourse ?? new Dictionary<int, int>();
+}
+@functions {
+    int GetLessonProgressPercent(Course course, Dictionary<int, int> completedByCourse)
+    {
+        int totalLessons = course.Lessons?.Count(l => !l.IsDeleted) ?? 0;
+        if (totalLessons == 0) return 0;
+
+        int completed = completedByCourse.TryGetValue(course.Id, out int c) ? c : 0;
+        return (int)Math.Round(completed * 100.0 / totalLessons);
+    }
+}
+@functions {
+    // A certificate unlocks once the student has passed every quiz (60%+) AND
+    // completed every lesson in the course. Courses with no lessons yet only
+    // need the quiz condition, so old courses aren't blocked retroactively.
+    bool IsCertificateUnlocked(Course course, List<QuizResult> results, int lessonPercent)
+    {
+        var activeQuizzes = course.Quizzes?.Where(q => !q.IsDeleted).ToList() ?? new List<Quiz>();
+        if (!activeQuizzes.Any()) return false;
+
+        foreach (var quiz in activeQuizzes)
+        {
+            var best = results
+                .Where(r => r.QuizId == quiz.Id)
+                .OrderByDescending(r => r.TotalCount == 0 ? 0 : (double)r.CorrectCount / r.TotalCount)
+                .FirstOrDefault();
+
+            bool passed = best != null && best.TotalCount > 0 && ((double)best.CorrectCount / best.TotalCount) >= 0.6;
+            if (!passed) return false;
+        }
+
+        int totalLessons = course.Lessons?.Count(l => !l.IsDeleted) ?? 0;
+        if (totalLessons > 0 && lessonPercent < 100) return false;
+
+        return true;
+    }
+}
+
+<div class="container-fluid bg-primary py-5 mb-5 page-header">
+    <div class="container py-5">
+        <h1 class="display-4 text-white text-center mb-0">My Courses</h1>
+    </div>
+</div>
+
+<div class="container-xxl py-5">
+    <div class="container">
+        <h3 class="mb-4"><i class="fa fa-graduation-cap text-primary me-2"></i>Courses I'm Enrolled In</h3>
+
+        @if (Model != null && Model.Any())
+        {
+            <div class="row g-4 mb-5">
+                @foreach (var enrollment in Model)
+                {
+                    var course = enrollment.Course;
+                    <div class="col-md-6 col-lg-4">
+                        <div class="course-item bg-white shadow-sm rounded h-100">
+                            <div class="position-relative overflow-hidden">
+                                <img class="img-fluid w-100" style="height:180px;object-fit:cover;" src="@(string.IsNullOrEmpty(course.ImageUrl) ? Url.Content($"~/img/course-{(course.Id % 3) + 1}.jpg") : Url.Content("~/uploads/courses/" + course.ImageUrl))" alt="@course.Name" onerror="this.onerror=null;this.src='@Url.Content("~/img/course-1.jpg")'">
+                                <div class="w-100 position-absolute bottom-0 start-0 p-3">
+                                    <span class="badge bg-primary">@course.Category?.Name</span>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <h5 class="mb-2">@course.Name</h5>
+                                <p class="text-muted small mb-2">Enrolled on: @enrollment.EnrolledDate.ToString("dd.MM.yyyy")</p>
+                                @{
+                                    int lessonPercent = GetLessonProgressPercent(course, completedLessonsByCourse);
+                                }
+                                <div class="d-flex justify-content-between small text-muted mb-1">
+                                    <span>Lesson progress</span>
+                                    <span>@lessonPercent%</span>
+                                </div>
+                                <div class="progress mb-3" style="height:8px;">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width:@(lessonPercent)%;"
+                                         aria-valuenow="@lessonPercent" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                                <a asp-controller="Course" asp-action="Details" asp-route-id="@course.Id" class="btn btn-outline-primary w-100 mb-2">Go to Course</a>
+                                @if (IsCertificateUnlocked(course, results, lessonPercent))
+                                {
+                                    <a asp-controller="Certificate" asp-action="View" asp-route-courseId="@course.Id" class="btn btn-warning w-100" target="_blank">
+                                        <i class="fa fa-award me-1"></i> Get Certificate
+                                    </a>
+                                }
+                                else
+                                {
+                                    bool hasLessons = (course.Lessons?.Count(l => !l.IsDeleted) ?? 0) > 0;
+                                    <button class="btn btn-outline-secondary w-100" disabled>
+                                        <i class="fa fa-lock me-1"></i> @(hasLessons ? "Complete all lessons & pass all quizzes to unlock" : "Pass all quizzes to unlock")
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-light border text-center py-4 mb-5">
+                You haven't enrolled in any course yet.
+                <a asp-controller="Course" asp-action="Index">Browse Courses</a>
+            </div>
+        }
+
+        <h3 class="mb-4"><i class="fa fa-chart-bar text-primary me-2"></i>My Quiz Results</h3>
+        @if (results != null && results.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle bg-white">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Quiz</th>
+                            <th>Course</th>
+                            <th>Score</th>
+                            <th>Percentage</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var result in results)
+                        {
+                            double percent = result.TotalCount > 0 ? Math.Round((double)result.CorrectCount / result.TotalCount * 100, 1) : 0;
+                            <tr>
+                                <td>@result.Quiz?.Title</td>
+                                <td>@result.Quiz?.Course?.Name</td>
+                                <td>@result.CorrectCount / @result.TotalCount</td>
+                                <td>
+                                    <span class="badge @(percent >= 60 ? "bg-success" : "bg-danger")">@percent%</span>
+                                </td>
+                                <td>@result.TakenDate.ToString("dd.MM.yyyy HH:mm")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-light border text-center py-4">
+                You haven't taken any quiz yet.
+            </div>
+        }
+    </div>
+</div>

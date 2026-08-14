@@ -1,0 +1,70 @@
+@{
+    ViewData["Title"] = "Messages";
+    List<LMS.Controllers.ChatConversationVM> conversations = ViewBag.Conversations;
+    bool isStudent = ViewBag.IsStudent;
+    List<Teacher> teachers = ViewBag.Teachers;
+}
+
+<div class="container-fluid bg-primary py-5 mb-5 page-header">
+    <div class="container py-5">
+        <h1 class="display-4 text-white text-center mb-0">Messages</h1>
+    </div>
+</div>
+
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row g-5">
+            <div class="col-lg-6">
+                <h4 class="mb-3"><i class="fa fa-comments text-primary me-2"></i>Your Conversations</h4>
+                @if (conversations != null && conversations.Any())
+                {
+                    <div class="list-group">
+                        @foreach (var c in conversations)
+                        {
+                            <a asp-controller="Chat" asp-action="Conversation" asp-route-id="@c.OtherUserId" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>@c.OtherUserName</strong>
+                                    <p class="text-muted small mb-0">@(string.IsNullOrWhiteSpace(c.LastMessage) ? "No messages yet" : (c.LastMessage.Length > 60 ? c.LastMessage.Substring(0, 60) + "..." : c.LastMessage))</p>
+                                </div>
+                                @if (c.UnreadCount > 0)
+                                {
+                                    <span class="badge bg-primary rounded-pill">@c.UnreadCount</span>
+                                }
+                            </a>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">You have no conversations yet.</p>
+                }
+            </div>
+
+            @if (isStudent)
+            {
+                <div class="col-lg-6">
+                    <h4 class="mb-3"><i class="fa fa-user-tie text-primary me-2"></i>Start a New Chat</h4>
+                    @if (teachers != null && teachers.Any())
+                    {
+                        <div class="list-group">
+                            @foreach (var t in teachers)
+                            {
+                                <a asp-controller="Chat" asp-action="Conversation" asp-route-id="@t.AppUserId" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>@t.FullName</strong>
+                                        <span class="badge bg-primary ms-2">@t.Subject</span>
+                                    </div>
+                                    <i class="fa fa-arrow-right text-primary"></i>
+                                </a>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No teachers are available for messaging yet.</p>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

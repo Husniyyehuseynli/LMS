@@ -1,0 +1,75 @@
+@model List<LMS.Models.ContactMessage>
+@{
+    ViewData["Title"] = "Contact Messages";
+}
+
+<h4 class="mb-4">Contact Messages</h4>
+
+<div class="card stat-card p-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Subject</th>
+                    <th>Sent</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var msg in Model)
+                    {
+                        <tr class="@(msg.IsRead ? "" : "fw-bold")">
+                            <td>
+                                @if (!msg.IsRead)
+                                {
+                                    <span class="badge bg-primary">New</span>
+                                }
+                            </td>
+                            <td>@msg.Name</td>
+                            <td>@msg.Email</td>
+                            <td>@msg.Subject</td>
+                            <td>@msg.SentDate.ToString("dd MMM yyyy, HH:mm")</td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#msg-@msg.Id">
+                                    <i class="fa fa-eye"></i> View
+                                </button>
+                                @if (!msg.IsRead)
+                                {
+                                    <form asp-action="MarkRead" asp-route-id="@msg.Id" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-success"><i class="fa fa-check"></i></button>
+                                    </form>
+                                }
+                                <a asp-action="Delete" asp-route-id="@msg.Id" class="btn btn-sm btn-outline-danger"><i class="fa fa-trash"></i></a>
+                            </td>
+                        </tr>
+
+                        <div class="modal fade" id="msg-@msg.Id" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">@msg.Subject</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p class="mb-1"><strong>From:</strong> @msg.Name (@msg.Email)</p>
+                                        <p class="mb-3"><strong>Sent:</strong> @msg.SentDate.ToString("dd MMM yyyy, HH:mm")</p>
+                                        <p style="white-space:pre-wrap;">@msg.Message</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="6" class="text-center text-muted">No messages yet.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,66 @@
+@model List<Course>
+@{
+    ViewData["Title"] = "Courses";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0">Courses</h5>
+    <a asp-area="Admin" asp-controller="Course" asp-action="Create" class="btn btn-primary"><i class="fa fa-plus me-2"></i>New Course</a>
+</div>
+
+<div class="card stat-card">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Instructor</th>
+                    <th>Duration</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var course in Model)
+                {
+                    <tr class="@(course.IsDeleted ? "table-secondary" : "")">
+                        <td><img src="@(string.IsNullOrEmpty(course.ImageUrl) ? Url.Content($"~/img/course-{(course.Id % 3) + 1}.jpg") : Url.Content("~/uploads/courses/" + course.ImageUrl))" style="width:60px;height:45px;object-fit:cover;border-radius:.3rem;" onerror="this.onerror=null;this.src='@Url.Content("~/img/course-1.jpg")'" /></td>
+                        <td>@course.Name</td>
+                        <td>@course.Category?.Name</td>
+                        <td>@course.InstructorName</td>
+                        <td>@course.DurationHours hours</td>
+                        <td>
+                            @if (course.IsDeleted)
+                            {
+                                <span class="badge bg-secondary">Inactive</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <a asp-area="Admin" asp-controller="Course" asp-action="Lessons" asp-route-id="@course.Id" class="btn btn-sm btn-outline-dark"><i class="fa fa-list-ol me-1"></i>Lessons</a>
+                            <a asp-area="Admin" asp-controller="Course" asp-action="Progress" asp-route-id="@course.Id" class="btn btn-sm btn-outline-success"><i class="fa fa-chart-line me-1"></i>Progress</a>
+                            <a asp-area="Admin" asp-controller="Course" asp-action="Update" asp-route-id="@course.Id" class="btn btn-sm btn-outline-primary"><i class="fa fa-edit"></i></a>
+                            @if (course.IsDeleted)
+                            {
+                                <form asp-area="Admin" asp-controller="Course" asp-action="Restore" asp-route-id="@course.Id" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-success"><i class="fa fa-undo"></i></button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form asp-area="Admin" asp-controller="Course" asp-action="Delete" asp-route-id="@course.Id" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fa fa-trash"></i></button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,54 @@
+@model Quiz
+@{
+    ViewData["Title"] = Model.Title;
+    var questions = Model.Questions?.Where(q => !q.IsDeleted).ToList() ?? new List<Question>();
+}
+
+<div class="container-fluid bg-primary py-5 mb-5 page-header">
+    <div class="container py-5">
+        <h1 class="display-4 text-white text-center mb-0">@Model.Title</h1>
+        <p class="text-white-50 text-center mb-0">@Model.Course?.Name</p>
+    </div>
+</div>
+
+<div class="container-xxl py-5">
+    <div class="container">
+        @if (!questions.Any())
+        {
+            <div class="alert alert-warning text-center">No questions have been added for this quiz yet.</div>
+        }
+        else
+        {
+            <form asp-controller="Quiz" asp-action="Submit" method="post">
+                <input type="hidden" name="quizId" value="@Model.Id" />
+
+                @for (int i = 0; i < questions.Count; i++)
+                {
+                    var q = questions[i];
+                    <div class="bg-light rounded p-4 mb-4">
+                        <h5 class="mb-3">@(i + 1). @q.Text</h5>
+
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="answers[@q.Id]" id="q@(q.Id)_a" value="A" required>
+                            <label class="form-check-label" for="q@(q.Id)_a">@q.OptionA</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="answers[@q.Id]" id="q@(q.Id)_b" value="B">
+                            <label class="form-check-label" for="q@(q.Id)_b">@q.OptionB</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="answers[@q.Id]" id="q@(q.Id)_c" value="C">
+                            <label class="form-check-label" for="q@(q.Id)_c">@q.OptionC</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="answers[@q.Id]" id="q@(q.Id)_d" value="D">
+                            <label class="form-check-label" for="q@(q.Id)_d">@q.OptionD</label>
+                        </div>
+                    </div>
+                }
+
+                <button type="submit" class="btn btn-primary w-100 py-3">Submit Answers</button>
+            </form>
+        }
+    </div>
+</div>

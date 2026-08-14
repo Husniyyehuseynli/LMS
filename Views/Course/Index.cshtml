@@ -1,0 +1,86 @@
+@model List<Course>
+@{
+    ViewData["Title"] = "Courses";
+    List<Category> categories = ViewBag.Categories;
+    int? selectedCategoryId = ViewBag.SelectedCategoryId;
+}
+
+<div class="container-fluid bg-primary py-5 mb-5 page-header">
+    <div class="container py-5">
+        <h1 class="display-4 text-white text-center mb-0">Courses</h1>
+    </div>
+</div>
+
+<div class="container-xxl py-5">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-3">
+                <div class="bg-light rounded p-4">
+                    <h5 class="mb-3">Categories</h5>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <a asp-controller="Course" asp-action="Index" class="text-decoration-none @(selectedCategoryId == null ? "fw-bold text-primary" : "text-dark")">
+                                <i class="fa fa-angle-right me-2"></i>All Courses
+                            </a>
+                        </li>
+                        @if (categories != null)
+                        {
+                            foreach (var cat in categories)
+                            {
+                                <li class="mb-2">
+                                    <a asp-controller="Course" asp-action="Index" asp-route-categoryId="@cat.Id" class="text-decoration-none @(selectedCategoryId == cat.Id ? "fw-bold text-primary" : "text-dark")">
+                                        <i class="fa fa-angle-right me-2"></i>@cat.Name
+                                    </a>
+                                </li>
+                            }
+                        }
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-lg-9">
+                <div class="row g-4">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var course in Model)
+                        {
+                            var activeReviews = course.Reviews?.Where(r => !r.IsDeleted).ToList() ?? new List<Review>();
+                            double avgRating = activeReviews.Any() ? Math.Round(activeReviews.Average(r => r.Rating), 1) : 0;
+                            int studentCount = course.Enrollments?.Count(e => !e.IsDeleted) ?? 0;
+
+                            <div class="col-md-6">
+                                <div class="course-item bg-white shadow-sm rounded h-100">
+                                    <div class="position-relative overflow-hidden">
+                                        <img class="img-fluid w-100" style="height:200px;object-fit:cover;" src="@(string.IsNullOrEmpty(course.ImageUrl) ? Url.Content($"~/img/course-{(course.Id % 3) + 1}.jpg") : Url.Content("~/uploads/courses/" + course.ImageUrl))" alt="@course.Name" onerror="this.onerror=null;this.src='@Url.Content("~/img/course-2.jpg")'">
+                                        <div class="w-100 d-flex justify-content-between position-absolute bottom-0 start-0 p-3">
+                                            <span class="badge bg-primary">@course.Category?.Name</span>
+                                            <span class="badge bg-dark"><i class="fa fa-clock me-1"></i>@course.DurationHours hours</span>
+                                        </div>
+                                    </div>
+                                    <div class="p-4">
+                                        <div class="mb-2">
+                                            <span class="badge bg-light text-dark border me-1"><i class="fa fa-signal me-1"></i>@course.Level</span>
+                                            <span class="badge bg-light text-dark border"><i class="fa fa-globe me-1"></i>@course.Language</span>
+                                        </div>
+                                        <h5 class="mb-2">@course.Name</h5>
+                                        <p class="text-muted mb-3">@course.ShortDescription</p>
+                                        <p class="mb-2 small"><i class="fa fa-user-tie text-primary me-2"></i>@course.InstructorName</p>
+                                        <div class="d-flex align-items-center justify-content-between mb-3 small text-muted">
+                                            <span><i class="fa fa-star text-warning me-1"></i>@avgRating.ToString("0.0") (@activeReviews.Count)</span>
+                                            <span><i class="fa fa-user-graduate me-1"></i>@studentCount student@(studentCount == 1 ? "" : "s")</span>
+                                        </div>
+                                        <a asp-controller="Course" asp-action="Details" asp-route-id="@course.Id" class="btn btn-primary w-100">View Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-center text-muted">There are no courses in this category yet.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
