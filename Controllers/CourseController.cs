@@ -83,13 +83,10 @@ namespace LMS.Controllers
             ViewBag.Reviews = activeReviews;
             ViewBag.StudentCount = await _db.Enrollments.CountAsync(e => e.CourseId == course.Id && !e.IsDeleted);
 
-            // Rating distribution for the "5★ -> 1★" bars shown in the Reviews tab.
+    
             ViewBag.RatingDistribution = Enumerable.Range(1, 5)
                 .ToDictionary(star => star, star => activeReviews.Count(r => r.Rating == star));
 
-            // Instructor stats — how many courses this teacher gives and how many
-            // students they have across all of them (LINQ over the existing tables,
-            // no new model needed).
             if (course.TeacherId != null)
             {
                 ViewBag.TeacherCourseCount = await _db.Courses
@@ -98,7 +95,6 @@ namespace LMS.Controllers
                     .CountAsync(e => e.Course.TeacherId == course.TeacherId && !e.IsDeleted);
             }
 
-            // Related courses: same category or same teacher, current course excluded.
             ViewBag.RelatedCourses = await _db.Courses
                 .Include(c => c.Category)
                 .Where(c => !c.IsDeleted && c.Id != course.Id &&
