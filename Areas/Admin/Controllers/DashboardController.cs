@@ -25,8 +25,8 @@ namespace LMS.Areas.Admin.Controllers
             ViewBag.StudentCount = await _db.Enrollments.Select(e => e.StudentId).Distinct().CountAsync();
             ViewBag.EnrollmentCount = await _db.Enrollments.CountAsync();
 
-            // Average lesson-completion % across every enrollment (courses with
-            // no lessons yet are excluded so they don't drag the average to 0).
+        
+            
             var enrollmentsWithLessons = await _db.Enrollments
                 .Where(e => !e.IsDeleted)
                 .Select(e => new
