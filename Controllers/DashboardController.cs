@@ -39,7 +39,7 @@ namespace LMS.Controllers
 
             ViewBag.QuizResults = results;
 
-            // Completed-lesson counts per course, for the progress bar on each card.
+
             List<int> courseIds = enrollments.Select(e => e.CourseId).ToList();
             Dictionary<int, int> completedByCourse = await _db.LessonProgresses
                 .Where(p => p.StudentId == user.Id && p.IsCompleted && courseIds.Contains(p.Lesson.CourseId))
@@ -52,8 +52,7 @@ namespace LMS.Controllers
             return View(enrollments);
         }
 
-        // A teacher's own read-only view of student progress, scoped to the
-        // courses linked to their Teacher profile (via Teacher.AppUserId).
+   
         [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> TeachingProgress()
         {
@@ -110,8 +109,7 @@ namespace LMS.Controllers
         }
     }
 
-    // Small view-model classes for the TeachingProgress page (kept in this file
-    // since they're only used there, next to the action that builds them).
+
     public class TeachingCourseSummary
     {
         public int CourseId { get; set; }
