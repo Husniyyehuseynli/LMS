@@ -54,7 +54,7 @@ namespace LMS.Areas.Admin.Controllers
                 .Select(p => new { p.StudentId, p.Lesson.CourseId })
                 .ToListAsync();
 
-            // ---- Per-course table: enrollments + certificates earned ----
+            
             var courseRows = new List<CourseReportRow>();
             int totalCertificates = 0;
 
@@ -103,7 +103,7 @@ namespace LMS.Areas.Admin.Controllers
 
             ViewBag.CourseRows = courseRows.OrderByDescending(r => r.EnrollmentCount).ToList();
 
-            // ---- Monthly enrollment trend (last 12 months) ----
+            
             var monthly = new List<MonthPoint>();
             var today = DateTime.Now;
             for (int i = 11; i >= 0; i--)
@@ -114,7 +114,7 @@ namespace LMS.Areas.Admin.Controllers
             }
             ViewBag.MonthlyEnrollments = monthly;
 
-            // ---- Yearly enrollment trend ----
+            
             var yearly = enrollments
                 .GroupBy(e => e.EnrolledDate.Year)
                 .OrderBy(g => g.Key)
@@ -122,7 +122,7 @@ namespace LMS.Areas.Admin.Controllers
                 .ToList();
             ViewBag.YearlyEnrollments = yearly;
 
-            // ---- Top-level totals ----
+        
             ViewBag.TotalStudents = enrollments.Select(e => e.StudentId).Distinct().Count();
             ViewBag.TotalEnrollments = enrollments.Count;
             ViewBag.TotalCertificates = totalCertificates;
