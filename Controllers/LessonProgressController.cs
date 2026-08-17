@@ -21,8 +21,6 @@ namespace LMS.Controllers
             _notifier = notifier;
         }
 
-        // Flips a lesson between "completed" / "not completed" for the current
-        // student. Only enrolled students can mark progress on a lesson.
         [HttpPost]
         public async Task<IActionResult> Toggle(int lessonId)
         {
@@ -56,8 +54,7 @@ namespace LMS.Controllers
 
             await _db.SaveChangesAsync();
 
-            // Recalculate the course-wide percentage so the JS can update
-            // both the lesson icon and the progress bar in one round trip.
+
             int totalLessons = await _db.Lessons.CountAsync(l => l.CourseId == lesson.CourseId && !l.IsDeleted);
             int completedLessons = await _db.LessonProgresses
                 .CountAsync(p => p.StudentId == user.Id && p.IsCompleted &&
@@ -65,9 +62,7 @@ namespace LMS.Controllers
 
             int percent = totalLessons > 0 ? (int)Math.Round(completedLessons * 100.0 / totalLessons) : 0;
 
-            // Notify the student (and the course's teacher, if any) the first
-            // time all lessons in the course are completed. Guarded by Url so
-            // re-toggling a lesson off/on later doesn't spam duplicates.
+    
             if (progress.IsCompleted && percent == 100 && totalLessons > 0)
             {
                 string courseUrl = $"/Course/Details/{lesson.CourseId}";
