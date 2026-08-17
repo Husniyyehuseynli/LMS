@@ -65,8 +65,7 @@ namespace LMS.Controllers
                 }
             }
 
-            // A certificate also requires every lesson to be marked completed,
-            // for courses that have lessons at all.
+       
             int totalLessons = course.Lessons?.Count(l => !l.IsDeleted) ?? 0;
             if (totalLessons > 0)
             {
@@ -85,8 +84,7 @@ namespace LMS.Controllers
             ViewBag.StudentName = $"{user.Name} {user.Surname}".Trim();
             ViewBag.IssueDate = DateTime.Now;
 
-            // First time this student reaches the certificate page for this
-            // course (i.e. all conditions above passed), let them know.
+        
             string certUrl = $"/Certificate/View?courseId={courseId}";
             bool alreadyNotified = await _db.Notifications.AnyAsync(n =>
                 n.RecipientId == user.Id && n.Url == certUrl && !n.IsDeleted);
