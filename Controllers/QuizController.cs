@@ -89,8 +89,7 @@ namespace LMS.Controllers
 
             if (result == null) return NotFound();
 
-            // A result belongs to exactly one student — make sure the person
-            // viewing it is that student, not someone who guessed the URL.
+         
             AppUser user = await _userManager.GetUserAsync(User);
             if (result.StudentId != user.Id) return Forbid();
 
