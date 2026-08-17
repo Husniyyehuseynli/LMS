@@ -24,7 +24,7 @@ namespace LMS.Areas.Admin.Controllers
             Course? course = await _db.Courses.FindAsync(courseId);
             if (course == null) return NotFound();
 
-            // Suggest the next order number so the admin doesn't have to count manually.
+            
             int nextOrder = await _db.Lessons
                 .Where(l => l.CourseId == courseId)
                 .Select(l => (int?)l.OrderIndex)
