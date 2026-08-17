@@ -21,8 +21,7 @@ namespace LMS.Controllers
             _notifier = notifier;
         }
 
-        // List of conversations for the current user, plus (for students) the full list
-        // of teachers they can start a new chat with.
+  
         public async Task<IActionResult> Index()
         {
             AppUser user = await _userManager.GetUserAsync(User);
@@ -62,7 +61,7 @@ namespace LMS.Controllers
             return View();
         }
 
-        // Message thread with a specific user (by their account id).
+   
         public async Task<IActionResult> Conversation(string id)
         {
             if (string.IsNullOrEmpty(id)) return NotFound();
@@ -112,10 +111,7 @@ namespace LMS.Controllers
             };
             await _db.ChatMessages.AddAsync(message);
 
-            // Let the receiver know a message is waiting for them, even if
-            // they aren't currently on this conversation page (navbar bell +
-            // /Notification/Index). Preview is trimmed so long messages don't
-            // blow out the notification list layout.
+           
             string preview = message.Content.Length > 80
                 ? message.Content.Substring(0, 80) + "..."
                 : message.Content;
@@ -137,7 +133,7 @@ namespace LMS.Controllers
             });
         }
 
-        // Polled by the conversation page to fetch new messages without a full reload.
+
         [HttpGet]
         public async Task<IActionResult> Poll(string otherUserId, int afterId = 0)
         {
