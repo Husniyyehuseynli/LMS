@@ -103,7 +103,7 @@ namespace LMS.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // Manage questions belonging to a quiz
+
         public async Task<IActionResult> Questions(int? id)
         {
             if (id == null) return NotFound();
