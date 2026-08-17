@@ -30,9 +30,7 @@ namespace LMS.Areas.Admin.Controllers
             return View(applications);
         }
 
-        // Approves the application: creates (or reuses) a login account with the
-        // Teacher role, creates the public Teacher profile, links the two, and
-        // marks the application Approved.
+   
         [HttpPost]
         public async Task<IActionResult> Approve(int id)
         {
@@ -85,10 +83,7 @@ namespace LMS.Areas.Admin.Controllers
             application.Status = ApplicationStatus.Approved;
             await _db.SaveChangesAsync();
 
-            // There's no email/SMS delivery set up, so the only way the applicant
-            // finds out their login exists is if someone on the team tells them —
-            // show the credentials here so that person actually has something to
-            // relay, instead of the password being generated and immediately lost.
+      
             TempData["ApplicationSuccess"] = createdNewAccount
                 ? $"{application.FirstName} {application.LastName} is now a teacher. Login: {application.Email} — Temporary password: {generatedPassword} (share this with them — it is shown only once and cannot be recovered afterwards; ask them to change it after first login)."
                 : $"{application.FirstName} {application.LastName} is now a teacher. They already had a login ({application.Email}) — let them know their existing password now also gives Teacher access.";
