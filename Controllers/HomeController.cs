@@ -20,11 +20,6 @@ namespace LMS.Controllers
             _notifier = notifier;
         }
 
-        // Sends an in-app bell notification to every Admin/Instructor account —
-        // the same roles that can access the ContactMessage and
-        // TeacherApplication admin pages. Used for things a real person needs
-        // to act on soon that otherwise sit silently in a table until someone
-        // happens to open that admin page.
         private async Task NotifyAdminsAsync(string title, string message, string url, string icon)
         {
             var admins = await _userManager.GetUsersInRoleAsync("Admin");
@@ -53,7 +48,6 @@ namespace LMS.Controllers
 
             ViewBag.Categories = categories;
 
-            // Homepage stat counters (animated in JS)
             ViewBag.StudentCount = await _db.Enrollments.Select(e => e.StudentId).Distinct().CountAsync();
             ViewBag.CourseCount = await _db.Courses.CountAsync(c => !c.IsDeleted);
             ViewBag.TeacherCount = await _db.Teachers.CountAsync(t => !t.IsDeleted);
