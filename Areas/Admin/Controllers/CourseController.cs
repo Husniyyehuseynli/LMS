@@ -160,7 +160,7 @@ namespace LMS.Areas.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // Manage lessons belonging to a course
+        
         public async Task<IActionResult> Lessons(int? id)
         {
             if (id == null) return NotFound();
@@ -171,8 +171,7 @@ namespace LMS.Areas.Admin.Controllers
             return View(course);
         }
 
-        // Per-course, per-student lesson-completion report — one row per
-        // enrolled student, one column per active lesson, plus an overall %.
+        
         public async Task<IActionResult> Progress(int? id)
         {
             if (id == null) return NotFound();
@@ -197,7 +196,7 @@ namespace LMS.Areas.Admin.Controllers
                 .Where(p => p.Lesson.CourseId == id && !p.Lesson.IsDeleted)
                 .ToListAsync();
 
-            // studentId -> (lessonId -> isCompleted), for O(1) lookups in the view.
+            
             Dictionary<string, Dictionary<int, bool>> progressByStudent = enrollments
                 .Select(e => e.StudentId)
                 .Distinct()
