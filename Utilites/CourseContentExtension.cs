@@ -2,11 +2,7 @@ using LMS.Models;
 
 namespace LMS.Utilites
 {
-    // Generates the "What You'll Learn" and "Requirements" lists shown on the
-    // Course Details page. No dedicated database columns exist for these yet —
-    // this keeps the generation logic in one place so it can later be swapped
-    // for real admin-managed fields (e.g. Course.LearningOutcomes) without
-    // touching the view.
+   
     public static class CourseContentExtension
     {
         public static List<string> GetWhatYoullLearn(this Course course)
