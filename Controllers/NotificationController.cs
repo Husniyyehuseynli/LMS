@@ -18,8 +18,6 @@ namespace LMS.Controllers
             _db = db;
             _userManager = userManager;
         }
-
-        // Full notifications page, newest first.
         public async Task<IActionResult> Index(string filter = "all")
         {
             AppUser user = await _userManager.GetUserAsync(User);
@@ -41,7 +39,7 @@ namespace LMS.Controllers
             return View(notifications);
         }
 
-        // Polled by the navbar bell for the unread count + a short preview list.
+      
         [HttpGet]
         public async Task<IActionResult> Unread()
         {
