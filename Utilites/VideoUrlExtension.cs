@@ -4,11 +4,6 @@ namespace LMS.Utilites
 {
     public static class VideoUrlExtension
     {
-        /// <summary>
-        /// Converts common YouTube URL formats (watch?v=, youtu.be/, already-embedded)
-        /// into a ready-to-embed https://www.youtube.com/embed/{id} URL.
-        /// Returns the original input unchanged if it doesn't look like a YouTube URL.
-        /// </summary>
         public static string? ToEmbedUrl(this string? url)
         {
             if (string.IsNullOrWhiteSpace(url)) return url;
