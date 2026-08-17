@@ -4,10 +4,7 @@ namespace LMS.Utilites
 {
     public static class CategoryIconExtension
     {
-        /// <summary>
-        /// Maps a CategoryIcon enum value to the matching Font Awesome CSS class,
-        /// so views only ever render real, known icon classes.
-        /// </summary>
+   
         public static string ToFaClass(this CategoryIcon icon)
         {
             return icon switch
